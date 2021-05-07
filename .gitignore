@@ -1,0 +1,9 @@
+env
+templates/AdminLTE-3.1.0
+banco
+.vscode
+__pycache__
+fundos.json
+indicadores.json
+*.xlsx
+.open
