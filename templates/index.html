@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+    <div class="container">
+      <h3>Digite o FII a ser procurado</h3>
+      <form action="/resultado" method="POST">
+          <div class="form-group">
+            <input type="text" class="form-control" id="fii" aria-describedby="fii"
+            name="fii" placeholder="valores separados por virgula">
+          </div>
+          <div class="row colunas">
+              <h6> Itens que farão parte do Valuation: {% for fii in fundos %}
+                {{fii}}, 
+             {% endfor%} </h6>
+          </div>
+          <div class="row"><span class="blank"></span></div>   
+          <div class="row colunas">
+            <input type="submit" class="btn btn-success" value="Procurar fundos">
+          </div>
+          
+      </form>
+    </div>
+    
+
+{% endblock %}
