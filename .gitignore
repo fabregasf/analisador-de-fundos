@@ -7,3 +7,4 @@ fundos.json
 indicadores.json
 *.xlsx
 .open
+__init__.py
