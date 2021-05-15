@@ -17,4 +17,8 @@
 .blank{
   height: 20px;
 }
-
+#plusinfo{
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+  font-size: 14px;
+  color: rgba(rgb(131, 117, 117), rgb(98, 139, 98), rgb(124, 124, 143), 0.6);
+}

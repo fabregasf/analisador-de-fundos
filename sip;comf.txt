@@ -1,0 +1,69 @@
+SIP só pra envio de call
+[CONTAENVIO]
+username
+secret
+host = 187.114... ; ip publico da filial checar empresa!
+quality = yes
+nat = yes
+disallow=all
+allow=g729 # usar codecs, testa
+
+
+
+
+Genérico funcional 
+[general]
+allowguest=yes
+allowexternalinvites=yes
+bindport = 5060
+bindaddr = 0.0.0.0 # verificar se funciona, senao trocar por udpbindaddr
+disallow = all
+allow = alaw,ulaw,gsm # verificar qual codec vai funcionar
+language = pt_BR
+nat=yes # obrigatório para rede interna, pode ser route, no, 
+tcpenable=no
+rfc2833compensate no sip_general_additional.conf
+
+# Clientes 
+[1001]
+callerid="Diretor - 001" <001>
+username=client1
+secret=password forte
+type=friend
+host=dynamic
+context=internal
+canreinvite=yes
+transport=tcp # trocar por udp se for udp no general
+disallow=all
+allow=G.711
+qualify=yes
+nat=yes
+dtmfmode=inband # tentar trocar por out-of-band
+
+[1002]
+type=friend
+context =internal
+secret=keyempresa
+host=dynamic
+transport=tcp ou udp
+
+Mais um.. 
+[general]
+udpbindaddr=0.0.0.0
+
+[ramal-voip](!)
+type=friend
+context=INTERNO
+host=dynamic
+disallow=all
+allow=ulaw
+allow=alaw
+allow=g729
+
+[1001]
+type=friend
+host=dynamic
+disallow=all
+allow=ulaw
+context=internal
+secret=1234

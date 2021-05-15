@@ -3,19 +3,38 @@
 
 {% block content %}
     <div class="container">
-        <div class="chart row" style="max-width: 300px;
-        max-height: 50px; text-align: center; margin-left: 40%;;">
-            <span >Resultados encontrados: </span>
+        <div class="chart row" style="max-width: 500px;
+        max-height: 50px; text-align: center; margin-left: 25%; ">
+            <h1 >Resultados encontrados: </h1>
             
-        </div> <br><br><br>
+        </div> <br><br><br><br><br>
         <div class="row" id="graficos" >        
+        </div> <br><br>
+        <div class="row" id="opcoes" >     
+            <a href="#" id="plusinfo" class="btn btn-lg btn-warning" data-toggle="modal" data-target="#modalinfo">
+                <span class="glyphicon glyphicon-search" aria-hidden="true"></span> Desempenho operacional</a>
         </div>
 
-
+        <div id="modalinfo" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title" style="text-align-last: center">Informações sobre preço</h4>
+                    </div>
+                    <div class="modal-body">                       
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <script>
-        
+        var dados_post; 
         function processData(data)
         {
             const obj = JSON.parse(data['res']);
@@ -26,16 +45,15 @@
         {
             $.post('/pipe', function(data){
                 processData(data);
-                plotCharts(data);
             });
-            
-
         });
         
         function plotCharts(data){
             console.log(data);
             var divmaior = document.getElementById('graficos');            
-            
+            // Ajuste nos caracteres dos dados
+            data = format(data);
+
             for (var j = 0; j<data.length; j++) {
                 var canvas = document.createElement("canvas");
                 canvas.setAttribute("class","mychart");     
@@ -43,11 +61,10 @@
 
                 var colunas = document.createElement("div");
                 colunas.setAttribute("class","col-md-4");   
+                colunas.style.backgroundColor="#E8E8E7";
+                
                 divmaior.append(colunas);
-                colunas.append(canvas);
-
-                // Ajuste nos caracteres dos dados
-                data = format(data);
+                colunas.append(canvas);                
                 
                 var myChart = new Chart(ctx, {
                     type: 'bar',
@@ -97,29 +114,7 @@
                                 ],
                                 borderWidth: 1,
                                 borderRadius: 2}
-                                // },
-                                // {
-                                // label: "EBITDA",
-                                // data: [data[j]["ebitda"]],
-                                // backgroundColor: [
-                                //     'rgba(255, 99, 132, 0.2)',
-                                //     'rgba(54, 162, 235, 0.2)',
-                                //     'rgba(255, 206, 86, 0.2)',
-                                //     'rgba(75, 192, 192, 0.2)',
-                                //     'rgba(153, 102, 255, 0.2)',
-                                //     'rgba(255, 159, 64, 0.2)'
-                                // ],
-                                // borderColor: [
-                                //     'rgba(255,99,132,1)',
-                                //     'rgba(54, 162, 235, 1)',
-                                //     'rgba(255, 206, 86, 1)',
-                                //     'rgba(75, 192, 192, 1)',
-                                //     'rgba(153, 102, 255, 1)',
-                                //     'rgba(255, 159, 64, 1)'
-                                // ],
-                                // borderWidth: 1,
-                                // borderRadius: 2
-                                // }
+                                
                             ]
                             },
                     options: {
@@ -139,31 +134,47 @@
                         }
                     }
                 });               
-
+                // # Definindo em tempo real a conversão de tipo, o JS permite já que é tipada dinamicamente
+                let temp = parseFloat(parseFloat(data[j]['caixalivre_12meses']).toFixed(2)/parseFloat(data[j]['caixalivre_hoje']).toFixed(2)).toFixed(2);
+                
+                if(parseFloat(temp) < 1){
+                    var empresas = 
+                    '<span> Legendas: M - Milhões, K - Milhares </span><p id="fcl-hoje"><br>'
+                    +'Empresa: '+data[j]['Tick'].substr(0,6)
+                    +'<br><b>Caixa livre hoje (livre de impostos e despesas): </b>'
+                    + data[j]['caixalivre_hoje']+ '. <span style="color: green; font-size:10px;"> Evoluiu em caixa ' 
+                    + parseFloat(1 - parseFloat(temp)).toFixed(2)*100
+                    +'% em relação ao final do ano.</span>  </p>'
+                    +'<p id="ll-ano"><b> Lucro liquido anterior: </b>'+data[j]['lucroliquido']+'</p>'
+                    +'<p id="capex-hoje"><b> Capex hoje (investimentos na área de atuação):</b> '+data[j]['capex']
+                        +'</p>'
+                    ;
+                }
+                else{ 
+                    var empresas = 
+                    '<span> Legendas: M - Milhões, K - Milhares </span><p id="fcl-hoje"><br>'
+                    +'Empresa: '+data[j]['Tick'].substr(0,6)
+                    +'<br><b>Caixa livre hoje (livre de impostos e despesas): </b>'
+                    + data[j]['caixalivre_hoje']+ '. <span style="color: green;">' 
+                    + parseFloat(temp) + 
+                    +' - Diminuiu em caixa. </span>%  </p><p id="capex-hoje"><b> Capex (nivel de investimento em ativos): </b></p>'
+                    +'<p id="lucro-hoje"><b> CAPEX: </b></p><hr>';
+                }    
+                $(".modal-body").append(empresas);
             }
             
         }
         
         function format(data){
-
-            for (var i = 0; i<data.length; i++) {
-                data[i]['CotacaoBase'] = data[i]['CotacaoBase']
-                .replace(",", ".")
-                .replace("%", " ")
-                .replace("R$", " ");                
-                data[i]['DyMes'] = data[i]['DyMes']
-                .replace(",", ".")
-                .replace("%", "")
-                .replace("R$", "");
-                data[i]['pvp'] = data[i]['pvp']
-                .replace(",", ".")
-                .replace("%", " ")
-                .replace("R$", "");
-
-            }
+            for(var i = 0; i < data.length; i++) {
+                for(var prop in data[i])
+                    data[i][prop] = data[i][prop].replace(',', '.').replace('%', ' ').replace('R$', ' ');
+            }            
             return data;
         }
-       
+        
+        
+
     </script>
 
 {% endblock %}

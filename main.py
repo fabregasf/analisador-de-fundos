@@ -21,9 +21,9 @@ app.config['SECRET_KEY'] = SECRET_KEY
 class Main(FlaskForm):   
 
     series = None 
+    fundos = fundos()
 
-
-    @app.route('/resultado', methods=['GET', 'POST'])
+    @app.route('/resultado', methods=['GET','POST'])
     def resultado():
         titulo = "Retorno da pesquisa"
        
@@ -33,7 +33,8 @@ class Main(FlaskForm):
         fundoss = nomefundo.split(',')  
             
         series = fundos.val(fundoss)            
-               
+        
+        
         with open('fundos.json', 'w') as outfile:
             json.dump(series.to_json(orient="records"), outfile)
             
@@ -46,7 +47,7 @@ class Main(FlaskForm):
 
     
 
-    @app.route("/", methods=['GET', 'POST'])
+    @app.route("/", methods=['GET','POST'])
     def index():
             form = Main()
              # Lista com os tipos de indicadores de valuation
@@ -54,9 +55,8 @@ class Main(FlaskForm):
 
             return render_template('index.html', form=form, fundos=itens_valuation)
     
-    # Rota virtual pra envio de dados no formato json
-    # Testar depois
-    @app.route('/pipe', methods=["GET", "POST"])
+    # Rota virtual pra envio de dados no formato json    
+    @app.route('/pipe', methods=['POST'])
     def pipe():
         payload = {}
         headers = {}
@@ -65,8 +65,6 @@ class Main(FlaskForm):
             data = json.load(json_file)
 
         return {"res":data}
-
-   
 
 
 if __name__ == "__main__":    

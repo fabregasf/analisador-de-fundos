@@ -7,27 +7,23 @@ from flask import *
 from wtforms import *
 from sqlite import Sqlite as meudb
 import matplotlib.pyplot as plt
-from highcharts import Highchart
 
 # Critérios de avaliação de fiis: valuation, técnica
-class Fundos(object):
-    
-    
-    # Gera gráficos com parametros passados do Dataset
-    def graficos(lista,indices):
-        
-        for coluna in indices: 
-            print(lista[coluna].values)            
+class Fundos(object):  
+    # Atribuindo na classe como Nada
+    lista_fiis=None;
+
+    # Array de atributos da classe, inicializando
+    def __init__(self):
+        # Inicializando como array
+        self.lista_fiis=[]
 
 
-            
-        
     # Pega fundos selecionados
     # Gera o relatório no excel
-    def val(fundos):
+    def val(self, fundos):
         info_fii={}
-        lista_fiis=[]
-        
+
         try:  
             for x in fundos:
 
@@ -41,8 +37,8 @@ class Fundos(object):
                 resp = req.get(url)
                 response = resp.text
                 soup=BeautifulSoup(response,'html.parser')
-                #print(soup)
                 
+                # filtros
                 tag2 = soup.select('span[class="indicator-value"]')    
                 nomefundo = soup.find("title")
                         
@@ -66,23 +62,29 @@ class Fundos(object):
                 info_fii['DataPagamento']=procura[1].get_text()
                 info_fii['CotacaoBase']=procura[2].get_text()
                 info_fii['DyMes']=procura[3].get_text()
-                info_fii['rendimento_atual']=procura[4].get_text()
+                info_fii['rendimento_atual']=procura[4].get_text()                             
 
                 resp = req.get(url3)
                 response = resp.text
                 soup=BeautifulSoup(response,'html.parser')
-
-                # procura = soup.find_all('table')[2].find_all('tr')[1].find_all('td')[1]
-                # procura2 = soup.find_all('table')[1].find_all('tr')[17].find_all('td')[1]
-                # Resultado anual contábil do ano anterior
-                # info_fii['EBITDA_Ano_anterior']= procura.find('span').get_text()
-                # info_fii['capex_hoje']= procura2.find('span').get_text()
+                # filtros
+                caixa_empresa = soup.find(id="contabil-section")
+                child = caixa_empresa.findChildren("tr")[12]
+                child2 = caixa_empresa.findChildren("tr")[17]
+                child3 = caixa_empresa.findChildren("tr")[107]
                 
-
-                lista_fiis.append(info_fii)
+                info_fii['caixalivre_hoje']=child.find_all("span")[1].get_text()
+                info_fii['caixalivre_12meses']=child.find_all("span")[7].get_text()
+                info_fii['capex']=child2.find_all("span")[1].get_text()
+                info_fii['lucroliquido']=child3.find_all("span")[1].get_text()
+                child = caixa_empresa.findChildren("tr")[44]
+                info_fii['caixa_receber_atual']=child.find_all("span")[1].get_text()
+                info_fii['caixa_receber_12meses']=child.find_all("span")[7].get_text()
+                
+                self.lista_fiis.append(info_fii)
                 info_fii={}            
-                meudb(x.replace(" ",""), "fiis")
-                print(len(lista_fiis))
+                # meudb(x.replace(" ",""), "fiis")
+                # print(len(self.lista_fiis))
 
         except HTTPError as e:
             print(e.status, e.reason)
